@@ -5,17 +5,16 @@ namespace Alura\Cursos\Controller;
 
 
 use Alura\Cursos\Entity\Curso;
-use Alura\Cursos\Helper\RenderizadorDeHtmlTrait;
-use Alura\Cursos\Infra\EntityManagerCreator;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ObjectRepository;
 use Nyholm\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class ListarCursos implements RequestHandlerInterface
+class CursosEmJson implements RequestHandlerInterface
 {
-    use RenderizadorDeHtmlTrait;
+    /** @var ObjectRepository */
     private $repositorioDeCursos;
 
     public function __construct(EntityManagerInterface $entityManager)
@@ -25,11 +24,7 @@ class ListarCursos implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $html = $this->renderizaHtml('cursos/listar-cursos.php', [
-           "cursos" => $this->repositorioDeCursos->findAll(),
-           "titulo" => "Lista de Cursos"
-        ]);
-
-        return new Response(200, [], $html );
+        $cursos = $this->repositorioDeCursos->findAll();
+        return new Response(200, [], json_encode($cursos));
     }
 }

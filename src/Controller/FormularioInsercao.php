@@ -5,15 +5,20 @@ namespace Alura\Cursos\Controller;
 
 
 use Alura\Cursos\Helper\RenderizadorDeHtmlTrait;
+use Nyholm\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
-class formularioInsercao implements InterfaceControladorRequisicao
+class formularioInsercao implements RequestHandlerInterface
 {
     use RenderizadorDeHtmlTrait;
-    public function processaRequisicao():  void
+    public function handle(ServerRequestInterface $request):  ResponseInterface
     {
-        echo $this->renderizaHtml('cursos/formulario.php', [
+        $html = $this->renderizaHtml('cursos/formulario.php', [
             "titulo" => "Novo Cusro"
         ]);
+        return new Response(200, [], $html);
     }
 
 }

@@ -1,6 +1,9 @@
 <?php
 
-use Alura\Cursos\Controller\InterfaceControladorRequisicao;
+use Nyholm\Psr7\Factory\Psr17Factory;
+use Nyholm\Psr7Server\ServerRequestCreator;
+use Psr\Container\ContainerInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 require_once __DIR__ . "/../vendor/autoload.php";
 
@@ -19,12 +22,30 @@ if(!isset($_SESSION['logado']) && $ehRotaDeLogin === false){
     exit();
 }
 
+$psr17Factory = new Psr17Factory();
+$creator = new ServerRequestCreator(
+    $psr17Factory, // ServerRequestFactory
+    $psr17Factory, // UrlFactory
+    $psr17Factory, // UploadedFileFactory
+    $psr17Factory // StreamFactory
+);
+$request = $creator->fromGlobals();
+
 $classeControladora =$rotas[$caminho];
 
-/** @var InterfaceControladorRequisicao $controlador */
-$controlador = new $classeControladora();
-$controlador->processaRequisicao();
+/** @var RequestHandlerInterface $controlador */
+/** @var ContainerInterface $container */
+$container =  require __DIR__ . '/../config/dependencies.php';
+$controlador = $container->get($classeControladora);
+$response = $controlador->handle($request);
 
+foreach ($response->getHeaders() as $name => $values) {
+    foreach ($values as $value) {
+        header(sprintf('%s: %s', $name, $value), false);
+    }
+}
+
+echo $response->getBody();
 
 
 
